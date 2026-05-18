@@ -1,0 +1,122 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 480" width="400" height="480">
+  <defs>
+    <style>
+      .shield-bg { fill: #1E3A5F; }
+      .shield-border { fill: none; stroke: #C9A84C; stroke-width: 6; }
+      .circuit { fill: none; stroke: #C9A84C; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+      .node-filled { fill: #C9A84C; }
+      .node-empty { fill: #1E3A5F; stroke: #C9A84C; stroke-width: 2; }
+      .lock-body { fill: #C9A84C; }
+      .lock-hole { fill: #1E3A5F; }
+      .wordmark { font-family: 'Georgia', 'Times New Roman', serif; fill: #1E3A5F; font-weight: 600; }
+      .tagline { font-family: 'Georgia', 'Times New Roman', serif; fill: #C9A84C; font-weight: 400; letter-spacing: 0.12em; }
+    </style>
+  </defs>
+
+  <!-- ── SHIELD SHAPE ── -->
+  <!-- Shield filled navy -->
+  <path class="shield-bg" d="M200 18 L340 62 L340 198 Q340 290 200 338 Q60 290 60 198 L60 62 Z"/>
+  <!-- Shield gold border -->
+  <path class="shield-border" d="M200 18 L340 62 L340 198 Q340 290 200 338 Q60 290 60 198 L60 62 Z"/>
+
+  <!-- Lock bump at top center -->
+  <path class="shield-bg" d="M174 18 Q200 4 226 18" stroke="#C9A84C" stroke-width="6" fill="#1E3A5F"/>
+  <path fill="none" stroke="#C9A84C" stroke-width="6" d="M174 20 Q200 6 226 20"/>
+
+  <!-- ── CIRCUIT BOARD PATTERN ── -->
+
+  <!-- Horizontal main lines -->
+  <line class="circuit" x1="100" y1="140" x2="300" y2="140"/>
+  <line class="circuit" x1="100" y1="178" x2="300" y2="178"/>
+  <line class="circuit" x1="110" y1="216" x2="290" y2="216"/>
+  <line class="circuit" x1="120" y1="254" x2="280" y2="254"/>
+  <line class="circuit" x1="140" y1="288" x2="260" y2="288"/>
+
+  <!-- Vertical connectors left side -->
+  <line class="circuit" x1="120" y1="140" x2="120" y2="216"/>
+  <line class="circuit" x1="150" y1="140" x2="150" y2="178"/>
+  <line class="circuit" x1="150" y1="216" x2="150" y2="254"/>
+  <line class="circuit" x1="120" y1="254" x2="120" y2="288"/>
+
+  <!-- Vertical connectors right side -->
+  <line class="circuit" x1="280" y1="140" x2="280" y2="216"/>
+  <line class="circuit" x1="250" y1="140" x2="250" y2="178"/>
+  <line class="circuit" x1="250" y1="216" x2="250" y2="254"/>
+  <line class="circuit" x1="280" y1="254" x2="280" y2="288"/>
+
+  <!-- Center vertical from lock down -->
+  <line class="circuit" x1="200" y1="108" x2="200" y2="140"/>
+  <line class="circuit" x1="200" y1="178" x2="200" y2="216"/>
+  <line class="circuit" x1="200" y1="254" x2="200" y2="288"/>
+  <line class="circuit" x1="200" y1="288" x2="200" y2="310"/>
+
+  <!-- Branch lines -->
+  <line class="circuit" x1="170" y1="216" x2="150" y2="216"/>
+  <line class="circuit" x1="230" y1="216" x2="250" y2="216"/>
+  <line class="circuit" x1="178" y1="254" x2="150" y2="254"/>
+  <line class="circuit" x1="222" y1="254" x2="250" y2="254"/>
+
+  <!-- ── CIRCUIT NODES ── -->
+
+  <!-- Row 1 nodes (y=140) -->
+  <circle class="node-filled" cx="120" cy="140" r="5"/>
+  <circle class="node-empty" cx="150" cy="140" r="5"/>
+  <circle class="node-filled" cx="250" cy="140" r="5"/>
+  <circle class="node-empty" cx="280" cy="140" r="5"/>
+
+  <!-- Row 2 nodes (y=178) -->
+  <circle class="node-filled" cx="100" cy="178" r="5"/>
+  <circle class="node-empty" cx="150" cy="178" r="5"/>
+  <circle class="node-filled" cx="200" cy="178" r="6"/>
+  <circle class="node-empty" cx="250" cy="178" r="5"/>
+  <circle class="node-filled" cx="300" cy="178" r="5"/>
+
+  <!-- Row 3 nodes (y=216) -->
+  <circle class="node-empty" cx="120" cy="216" r="5"/>
+  <circle class="node-filled" cx="150" cy="216" r="5"/>
+  <circle class="node-filled" cx="200" cy="216" r="5"/>
+  <circle class="node-filled" cx="250" cy="216" r="5"/>
+  <circle class="node-empty" cx="280" cy="216" r="5"/>
+
+  <!-- Row 4 nodes (y=254) -->
+  <circle class="node-filled" cx="120" cy="254" r="5"/>
+  <circle class="node-empty" cx="150" cy="254" r="5"/>
+  <circle class="node-filled" cx="200" cy="254" r="5"/>
+  <circle class="node-empty" cx="250" cy="254" r="5"/>
+  <circle class="node-filled" cx="280" cy="254" r="5"/>
+
+  <!-- Row 5 nodes (y=288) -->
+  <circle class="node-empty" cx="140" cy="288" r="5"/>
+  <circle class="node-filled" cx="200" cy="288" r="5"/>
+  <circle class="node-empty" cx="260" cy="288" r="5"/>
+
+  <!-- Bottom terminal -->
+  <circle class="node-filled" cx="200" cy="310" r="5"/>
+
+  <!-- ── PADLOCK ── -->
+  <!-- Lock body -->
+  <rect class="lock-body" x="176" y="60" width="48" height="40" rx="6"/>
+  <!-- Lock shackle -->
+  <path fill="none" stroke="#C9A84C" stroke-width="5" stroke-linecap="round"
+    d="M183 60 L183 48 Q183 30 200 30 Q217 30 217 48 L217 60"/>
+  <!-- Lock inner highlight -->
+  <rect fill="#1E3A5F" x="182" y="66" width="36" height="28" rx="4"/>
+  <!-- Keyhole circle -->
+  <circle class="node-filled" cx="200" cy="76" r="6"/>
+  <!-- Keyhole stem -->
+  <rect class="lock-body" x="197" y="78" width="6" height="9" rx="1"/>
+
+  <!-- ── WORDMARK ── -->
+  <text class="wordmark" x="200" y="385" font-size="42" text-anchor="middle">TOS Firewall</text>
+
+  <!-- Tagline -->
+  <text class="tagline" x="200" y="415" font-size="12" text-anchor="middle">TRUST VERIFIED · QUAD-ENGINE AUDITED</text>
+
+  <!-- Gold rule lines flanking tagline -->
+  <line x1="60" y1="423" x2="145" y2="423" stroke="#C9A84C" stroke-width="0.8" opacity="0.6"/>
+  <line x1="255" y1="423" x2="340" y2="423" stroke="#C9A84C" stroke-width="0.8" opacity="0.6"/>
+
+  <!-- Version mark -->
+  <text font-family="Georgia, serif" font-size="9" fill="#C9A84C" opacity="0.5"
+    x="200" y="445" text-anchor="middle">v1.0 · tosfirewall.com</text>
+</svg>

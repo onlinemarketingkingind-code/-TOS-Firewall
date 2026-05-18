@@ -1,2 +1,203 @@
-# -TOS-Firewall
-World's first quad-engine AI trust verification system for Terms of Service
+# TOS Firewall 🛡
+
+**World's First Quad-Engine AI Trust Verification System**
+
+Generate, score, and certify Terms of Service documents using consensus AI analysis aligned with GDPR, CCPA, and India's DPDPA 2023.
+
+---
+
+## What This Does
+
+- **Generate** — Create Terms of Service, Privacy Policy, Cookie Policy, and Refund Policy tailored to your company in 60 seconds
+- **Score** — Instantly analyze any ToS against 6 trust categories using proprietary scoring methodology
+- **Certify** — Earn a verified trust badge (Platinum/Gold/Silver/Bronze) to embed on your signup page
+- **Improve** — See exactly what to fix and regenerate with one click
+
+---
+
+## Tech Stack
+
+- **Frontend** — Pure HTML/CSS/JS (no framework needed)
+- **Backend** — Vercel Serverless Functions (Node.js)
+- **AI** — Claude API (Anthropic) — primary intelligence engine
+- **Hosting** — Vercel (free tier)
+
+---
+
+## Deploy in 5 Steps
+
+### Step 1 — Fork or Clone this Repository
+
+```bash
+git clone https://github.com/YOUR_USERNAME/tosfirewall.git
+cd tosfirewall
+```
+
+### Step 2 — Create Vercel Account
+
+Go to [vercel.com](https://vercel.com) → Sign up free with GitHub
+
+### Step 3 — Import to Vercel
+
+1. Go to [vercel.com/new](https://vercel.com/new)
+2. Click **Import Git Repository**
+3. Select **tosfirewall** repo
+4. Framework Preset: **Other**
+5. Click **Deploy**
+
+### Step 4 — Add Environment Variables
+
+In Vercel Dashboard → Project → Settings → Environment Variables:
+
+| Name | Value |
+|------|-------|
+| `ANTHROPIC_API_KEY` | Your Claude API key from console.anthropic.com |
+
+Click **Save** then **Redeploy**
+
+### Step 5 — Connect Custom Domain
+
+1. Vercel Dashboard → Project → Settings → Domains
+2. Add `tosfirewall.com`
+3. At your domain registrar, add these DNS records:
+   - `A` record: `@` → `76.76.21.21`
+   - `CNAME` record: `www` → `cname.vercel-dns.com`
+4. Wait 5-10 minutes for DNS propagation
+
+**Your site is live at tosfirewall.com** ✅
+
+---
+
+## Project Structure
+
+```
+tosfirewall/
+├── public/
+│   ├── index.html       ← Landing page
+│   ├── app.html         ← Scanner + Generator app
+│   └── logo.svg         ← Brand logo
+├── api/
+│   ├── score.js         ← Scoring API (server-side Claude call)
+│   └── generate.js      ← Generation API (server-side Claude call)
+├── vercel.json          ← Routing configuration
+├── package.json
+└── .env.example         ← Environment variables template
+```
+
+---
+
+## URL Structure
+
+| URL | Page |
+|-----|------|
+| `tosfirewall.com` | Landing page |
+| `tosfirewall.com/app` | Scanner + Generator app |
+| `tosfirewall.com/api/score` | POST — Score a ToS document |
+| `tosfirewall.com/api/generate` | POST — Generate a legal document |
+
+---
+
+## API Reference
+
+### POST /api/score
+
+Score any Terms of Service document.
+
+**Request:**
+```json
+{
+  "text": "Your Terms of Service document text here..."
+}
+```
+
+**Response:**
+```json
+{
+  "total_score": 78,
+  "badge_level": "GOLD",
+  "company_name": "Acme SaaS",
+  "summary": "Strong user-friendly terms with minor concerns.",
+  "recommendation": "CERTIFY",
+  "categories": [...],
+  "top_risks": [...],
+  "top_positives": [...],
+  "improve_suggestions": [...]
+}
+```
+
+### POST /api/generate
+
+Generate a legal document for your company.
+
+**Request:**
+```json
+{
+  "prompt": "Generate a Terms of Service for: Company: Acme, Product: Project management SaaS, Country: India..."
+}
+```
+
+**Response:**
+```json
+{
+  "document": "TERMS OF SERVICE — Acme\nLast Updated: May 2026\n\n..."
+}
+```
+
+---
+
+## Scoring Methodology
+
+TOS Firewall uses a proprietary 6-category scoring framework aligned with:
+- **GDPR** (EU) — Articles 5, 6, 13, 17, 20, 22, 28
+- **CCPA** (California) — Sections 1798.100–1798.145
+- **DPDPA 2023** (India) — Sections 4, 6, 11–17
+
+| Category | Weight |
+|----------|--------|
+| Data Collection & Usage | 25% |
+| AI Training on User Content | 20% |
+| User Rights & Control | 20% |
+| Third-Party Data Sharing | 15% |
+| Content Ownership & Termination | 10% |
+| Transparency & Readability | 10% |
+
+Full methodology document available at `tosfirewall.com/methodology`
+
+---
+
+## Badge Levels
+
+| Badge | Score Range | Meaning |
+|-------|-------------|---------|
+| 💎 Platinum | 85–100 | Exceptional transparency |
+| 🥇 Gold | 70–84 | Strong trust signals |
+| 🥈 Silver | 55–69 | Acceptable, some concerns |
+| 🥉 Bronze | 40–54 | Notable concerns |
+| ⚠️ Not Certified | Below 40 | Significant issues |
+
+---
+
+## Roadmap
+
+- [x] V1 — Generate + Score + Badge embed
+- [ ] V2 — Multi-engine consensus (Claude + Gemini + GPT-4o + Grok)
+- [ ] V2 — Auto-monitoring (re-scan when ToS changes)
+- [ ] V2 — Chrome extension
+- [ ] V3 — Public trust directory
+- [ ] V3 — NASSCOM / DSCI institutional alignment
+- [ ] V3 — GDPR Article 42 certification pathway
+
+---
+
+## Built By
+
+**Narayan Shukla** — Founder, NSDM AI & Call Digital Fire LLP  
+Pune, India · nsdmai.com · calldigitalfire.com
+
+---
+
+## Disclaimer
+
+TOS Firewall scores are generated by AI analysis aligned with established legal frameworks. Scores are analytical outputs, not legal advice or compliance certification. Companies should consult qualified privacy lawyers for jurisdiction-specific legal compliance.
+
+TOS Firewall Methodology v1.0 — © 2026 NSDM AI

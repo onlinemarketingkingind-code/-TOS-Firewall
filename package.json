@@ -1,0 +1,16 @@
+{
+  "name": "tosfirewall",
+  "version": "1.0.0",
+  "description": "TOS Firewall — World's First Quad-Engine AI Trust Verification System",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "dev": "vercel dev",
+    "deploy": "vercel --prod"
+  },
+  "devDependencies": {
+    "vercel": "^32.0.0"
+  }
+}

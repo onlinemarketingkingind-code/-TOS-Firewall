@@ -1,0 +1,1131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOS Firewall — Multi-Engine AI Trust Verification</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root {
+  --ink: #0A0C10;
+  --ink2: #0F1319;
+  --ink3: #161B24;
+  --gold: #C9A84C;
+  --gold2: #E8C97A;
+  --gold3: #F5E4B0;
+  --steel: #2A3244;
+  --steel2: #364057;
+  --mist: #8A95A8;
+  --fog: #C4CAD6;
+  --white: #F0F2F5;
+  --platinum: #E8EDF5;
+  --accent: #4A9EDB;
+  --r: 6px;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--fog);
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 300;
+  line-height: 1.7;
+  overflow-x: hidden;
+}
+
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* ── NAV ── */
+nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 3rem;
+  height: 68px;
+  border-bottom: 1px solid rgba(201,168,76,0.12);
+  background: rgba(10,12,16,0.85);
+  backdrop-filter: blur(20px);
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+}
+
+.nav-shield {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.nav-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--white);
+  letter-spacing: 0.02em;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  list-style: none;
+}
+
+.nav-links a {
+  font-size: 13px;
+  color: var(--mist);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--gold2); }
+
+.nav-cta {
+  font-size: 13px;
+  padding: 9px 22px;
+  background: transparent;
+  border: 1px solid var(--gold);
+  color: var(--gold2);
+  border-radius: var(--r);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.nav-cta:hover { background: var(--gold); color: var(--ink); }
+
+/* ── HERO ── */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 8rem 2rem 5rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-glow {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.hero-glow2 {
+  position: absolute;
+  width: 800px; height: 400px;
+  background: radial-gradient(ellipse, rgba(74,158,219,0.04) 0%, transparent 70%);
+  top: 30%; left: 20%;
+  pointer-events: none;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.3);
+  padding: 6px 16px;
+  border-radius: 20px;
+  margin-bottom: 2rem;
+  animation: fadeUp 0.8s ease both;
+}
+
+.hero-tag::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--gold);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}
+
+.hero h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(3rem, 7vw, 6.5rem);
+  font-weight: 300;
+  color: var(--white);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-bottom: 1.5rem;
+  animation: fadeUp 0.8s 0.1s ease both;
+}
+
+.hero h1 em {
+  font-style: normal;
+  background: linear-gradient(135deg, var(--gold), var(--gold2), var(--gold3));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: clamp(15px, 2vw, 18px);
+  color: var(--mist);
+  max-width: 580px;
+  line-height: 1.75;
+  margin-bottom: 3rem;
+  animation: fadeUp 0.8s 0.2s ease both;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  animation: fadeUp 0.8s 0.3s ease both;
+}
+
+.btn-primary {
+  padding: 14px 36px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--ink);
+  border: none;
+  border-radius: var(--r);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(201,168,76,0.25); }
+
+.btn-ghost {
+  padding: 13px 36px;
+  background: transparent;
+  color: var(--fog);
+  border: 1px solid var(--steel2);
+  border-radius: var(--r);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+  display: inline-block;
+}
+.btn-ghost:hover { border-color: var(--mist); color: var(--white); }
+
+.hero-stats {
+  display: flex;
+  gap: 3rem;
+  margin-top: 4rem;
+  padding-top: 3rem;
+  border-top: 1px solid var(--steel);
+  animation: fadeUp 0.8s 0.4s ease both;
+}
+
+.stat-item { text-align: center; }
+.stat-num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2.2rem;
+  font-weight: 400;
+  color: var(--gold2);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.stat-label { font-size: 12px; color: var(--mist); letter-spacing: 0.06em; text-transform: uppercase; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── SECTION COMMONS ── */
+section { padding: 6rem 2rem; position: relative; }
+.container { max-width: 1100px; margin: 0 auto; }
+.container-sm { max-width: 760px; margin: 0 auto; }
+
+.section-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1rem;
+}
+
+.section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: var(--white);
+  line-height: 1.2;
+  margin-bottom: 1.25rem;
+}
+
+.section-body {
+  font-size: 16px;
+  color: var(--mist);
+  line-height: 1.8;
+  max-width: 560px;
+}
+
+/* ── HOW IT WORKS ── */
+.how-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 5rem;
+  align-items: center;
+}
+
+.steps { display: flex; flex-direction: column; gap: 2rem; }
+
+.step {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  opacity: 0;
+  transform: translateX(-20px);
+  transition: all 0.5s ease;
+}
+.step.visible { opacity: 1; transform: none; }
+
+.step-num {
+  width: 40px; height: 40px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--gold2);
+  flex-shrink: 0;
+}
+
+.step-title { font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: 4px; }
+.step-desc { font-size: 13px; color: var(--mist); line-height: 1.7; }
+
+/* ── ENGINE VISUAL ── */
+.engine-box {
+  background: var(--ink2);
+  border: 1px solid var(--steel);
+  border-radius: 16px;
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.engine-box::before {
+  content: '';
+  position: absolute;
+  top: -50%; left: -50%;
+  width: 200%; height: 200%;
+  background: radial-gradient(circle at 60% 40%, rgba(201,168,76,0.05) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+.engine-title {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--steel);
+}
+
+.engines-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1.25rem; }
+
+.engine-chip {
+  background: var(--ink3);
+  border: 1px solid var(--steel);
+  border-radius: var(--r);
+  padding: 10px 14px;
+  font-size: 13px;
+  color: var(--fog);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.3s;
+}
+.engine-chip.active { border-color: var(--gold); }
+
+.engine-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--steel2);
+  flex-shrink: 0;
+  transition: background 0.3s;
+}
+.engine-chip.active .engine-dot { background: var(--gold); animation: pulse 1.5s infinite; }
+
+.consensus-bar {
+  background: var(--ink3);
+  border: 1px solid var(--steel);
+  border-radius: var(--r);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.consensus-label { font-size: 12px; color: var(--mist); }
+.consensus-score {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  color: var(--gold2);
+  font-weight: 400;
+  line-height: 1;
+}
+
+.score-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: var(--steel);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.score-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--gold), var(--gold2));
+  border-radius: 3px;
+  width: 0%;
+  transition: width 1.5s ease;
+}
+
+/* ── BADGES ── */
+.badges-section { background: var(--ink2); border-top: 1px solid var(--steel); border-bottom: 1px solid var(--steel); }
+
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+.badge-card-item {
+  background: var(--ink3);
+  border: 1px solid var(--steel);
+  border-radius: 12px;
+  padding: 1.5rem 1rem;
+  text-align: center;
+  transition: all 0.2s;
+  cursor: default;
+}
+.badge-card-item:hover { transform: translateY(-4px); border-color: var(--steel2); }
+
+.badge-circle-item {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  margin: 0 auto 0.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid;
+}
+
+.badge-score-sm { font-family: 'Cormorant Garamond', serif; font-size: 18px; font-weight: 500; line-height: 1; }
+.badge-name { font-size: 12px; font-weight: 500; margin-bottom: 4px; }
+.badge-range { font-size: 11px; color: var(--mist); }
+
+/* ── AUTHORITY ── */
+.authority-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 3rem;
+}
+
+.authority-card {
+  background: var(--ink2);
+  border: 1px solid var(--steel);
+  border-radius: 12px;
+  padding: 1.75rem;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s;
+}
+.authority-card:hover { border-color: var(--gold); }
+
+.authority-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gold), transparent);
+}
+
+.authority-icon {
+  width: 44px; height: 44px;
+  background: rgba(201,168,76,0.1);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  margin-bottom: 1rem;
+}
+
+.authority-title { font-size: 15px; font-weight: 500; color: var(--white); margin-bottom: 6px; }
+.authority-desc { font-size: 13px; color: var(--mist); line-height: 1.7; }
+
+.coming-soon-pill {
+  display: inline-block;
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.3);
+  padding: 2px 8px;
+  border-radius: 20px;
+  margin-top: 8px;
+}
+
+/* ── WHO IT'S FOR ── */
+.who-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-top: 3rem;
+}
+
+.who-card {
+  background: var(--ink2);
+  border: 1px solid var(--steel);
+  border-radius: 12px;
+  padding: 1.75rem;
+  transition: all 0.2s;
+}
+.who-card:hover { border-color: var(--steel2); transform: translateY(-2px); }
+
+.who-tag {
+  display: inline-block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  background: rgba(201,168,76,0.1);
+  color: var(--gold2);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 0.75rem;
+}
+
+.who-title { font-size: 16px; font-weight: 500; color: var(--white); margin-bottom: 6px; }
+.who-desc { font-size: 13px; color: var(--mist); line-height: 1.7; }
+
+/* ── WAITLIST ── */
+.waitlist-section {
+  text-align: center;
+  padding: 7rem 2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.waitlist-glow {
+  position: absolute;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(201,168,76,0.07) 0%, transparent 70%);
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.waitlist-box {
+  background: var(--ink2);
+  border: 1px solid var(--steel);
+  border-radius: 20px;
+  padding: 4rem 3rem;
+  max-width: 620px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.waitlist-box::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 20%; right: 20%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.waitlist-form {
+  display: flex;
+  gap: 10px;
+  margin-top: 2rem;
+}
+
+.waitlist-input {
+  flex: 1;
+  padding: 13px 18px;
+  background: var(--ink3);
+  border: 1px solid var(--steel2);
+  border-radius: var(--r);
+  color: var(--white);
+  font-size: 14px;
+  font-family: 'DM Sans', sans-serif;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.waitlist-input::placeholder { color: var(--mist); }
+.waitlist-input:focus { border-color: var(--gold); }
+
+.waitlist-btn {
+  padding: 13px 28px;
+  background: linear-gradient(135deg, var(--gold), var(--gold2));
+  color: var(--ink);
+  border: none;
+  border-radius: var(--r);
+  font-size: 14px;
+  font-weight: 500;
+  font-family: 'DM Sans', sans-serif;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.waitlist-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(201,168,76,0.3); }
+
+.waitlist-note { font-size: 12px; color: var(--mist); margin-top: 1rem; }
+
+.success-msg {
+  display: none;
+  background: rgba(39,174,96,0.1);
+  border: 1px solid rgba(39,174,96,0.3);
+  border-radius: var(--r);
+  padding: 12px 20px;
+  font-size: 14px;
+  color: #7DCEA0;
+  margin-top: 1rem;
+}
+
+/* ── ASSOCIATIONS ── */
+.assoc-section { padding: 4rem 2rem; border-top: 1px solid var(--steel); }
+
+.assoc-label {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist);
+  margin-bottom: 2.5rem;
+}
+
+.assoc-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.assoc-item {
+  font-size: 13px;
+  color: var(--steel2);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  font-weight: 500;
+  padding: 8px 20px;
+  border: 1px solid var(--steel);
+  border-radius: 20px;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.assoc-item.pending::after {
+  content: 'Coming';
+  position: absolute;
+  top: -8px; right: -4px;
+  font-size: 9px;
+  background: var(--steel);
+  color: var(--mist);
+  padding: 1px 6px;
+  border-radius: 10px;
+  letter-spacing: 0.05em;
+}
+
+.assoc-item.active {
+  color: var(--gold2);
+  border-color: rgba(201,168,76,0.3);
+}
+
+/* ── FOOTER ── */
+footer {
+  border-top: 1px solid var(--steel);
+  padding: 3rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.footer-brand {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.footer-copy { font-size: 12px; color: var(--mist); }
+
+.footer-links { display: flex; gap: 2rem; }
+.footer-links a { font-size: 12px; color: var(--mist); text-decoration: none; transition: color 0.2s; }
+.footer-links a:hover { color: var(--gold2); }
+
+/* ── SCROLL ANIMATIONS ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: all 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── DIVIDER ── */
+.gold-line {
+  width: 40px; height: 1px;
+  background: var(--gold);
+  margin: 1.5rem 0;
+}
+
+/* ── MOBILE ── */
+@media(max-width:768px) {
+  nav { padding: 0 1.5rem; }
+  .nav-links { display: none; }
+  .how-wrap { grid-template-columns: 1fr; gap: 3rem; }
+  .badges-grid { grid-template-columns: repeat(3, 1fr); }
+  .authority-grid { grid-template-columns: 1fr; }
+  .who-grid { grid-template-columns: 1fr; }
+  .hero-stats { gap: 2rem; }
+  .waitlist-form { flex-direction: column; }
+  footer { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-shield">🛡</div>
+    <span class="nav-name">TOS Firewall</span>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#how">How it works</a></li>
+    <li><a href="#badges">Trust Levels</a></li>
+    <li><a href="#authority">Authority</a></li>
+    <li><a href="#who">Who it's for</a></li>
+  </ul>
+  <a href="/app" class="nav-cta">Get Early Access</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow2"></div>
+  <div class="hero-tag">World's First Quad-Engine ToS Audit System</div>
+  <h1>Your Terms of Service.<br><em>Verified. Trusted. Certified.</em></h1>
+  <p class="hero-sub">Four independent AI engines audit your Terms of Service simultaneously — Claude, Gemini, GPT-4o, and Grok. Consensus scoring. Legal framework alignment. One embeddable trust badge that converts skeptical users into confident customers.</p>
+  <div class="hero-actions">
+    <a href="/app" class="btn-primary">Request Early Access</a>
+    <a href="#how" class="btn-ghost">See How It Works</a>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">4×</div>
+      <div class="stat-label">AI Engines</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">6</div>
+      <div class="stat-label">Audit Categories</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">91%</div>
+      <div class="stat-label">Users Skip ToS</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">∞</div>
+      <div class="stat-label">Trust Gap</div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="container">
+    <div class="how-wrap">
+      <div>
+        <div class="section-eyebrow reveal">The Process</div>
+        <h2 class="section-title reveal">Not one AI.<br>Four independent auditors.</h2>
+        <div class="gold-line reveal"></div>
+        <p class="section-body reveal">Every other ToS tool runs a single AI model. A single model can hallucinate. A single model has biases. A single model's error is your liability. TOS Firewall runs four independent engines simultaneously — Claude, Gemini, GPT-4o, and Grok. A clause is only flagged when multiple systems agree.</p>
+        <div class="steps" style="margin-top:2.5rem">
+          <div class="step reveal">
+            <div class="step-num">1</div>
+            <div>
+              <div class="step-title">Submit your ToS document</div>
+              <div class="step-desc">Paste your Terms of Service URL or text. Our extractor pulls the full legal document.</div>
+            </div>
+          </div>
+          <div class="step reveal">
+            <div class="step-num">2</div>
+            <div>
+              <div class="step-title">Four engines audit simultaneously</div>
+              <div class="step-desc">Claude, Gemini, GPT-4o, and Grok (xAI) each independently analyze your document across 6 legal categories aligned with GDPR, CCPA, and India's DPDPA 2023.</div>
+            </div>
+          </div>
+          <div class="step reveal">
+            <div class="step-num">3</div>
+            <div>
+              <div class="step-title">Consensus scoring</div>
+              <div class="step-desc">A conflict resolution layer compares all three outputs. Disagreements are escalated. Only consensus findings appear in your report.</div>
+            </div>
+          </div>
+          <div class="step reveal">
+            <div class="step-num">4</div>
+            <div>
+              <div class="step-title">Embed your verified badge</div>
+              <div class="step-desc">One line of code. Your trust badge appears on your signup page — live, updated automatically when your ToS changes.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="engine-box reveal">
+        <div class="engine-title">Multi-Engine Audit — Live</div>
+        <div class="engines-grid" style="grid-template-columns:1fr 1fr 1fr">
+          <div class="engine-chip active" id="chip1">
+            <div class="engine-dot"></div>
+            <span>Claude</span>
+          </div>
+          <div class="engine-chip" id="chip2">
+            <div class="engine-dot"></div>
+            <span>Gemini</span>
+          </div>
+          <div class="engine-chip" id="chip3">
+            <div class="engine-dot"></div>
+            <span>GPT-4o</span>
+          </div>
+          <div class="engine-chip" id="chip4">
+            <div class="engine-dot"></div>
+            <span>Grok (xAI)</span>
+          </div>
+          <div class="engine-chip" id="chip5">
+            <div class="engine-dot"></div>
+            <span>Legal Rules</span>
+          </div>
+          <div class="engine-chip" id="chip6" style="border-color:var(--gold); background:rgba(201,168,76,0.05)">
+            <div class="engine-dot" style="background:var(--gold)"></div>
+            <span style="color:var(--gold2)">Consensus</span>
+          </div>
+        </div>
+        <div style="font-size:11px; color:var(--mist); letter-spacing:0.06em; text-transform:uppercase; margin-bottom:10px; text-align:center">Consensus Score</div>
+        <div class="consensus-bar">
+          <div class="consensus-label">Trust Score</div>
+          <div class="score-bar-bg"><div class="score-bar-fill" id="score-fill"></div></div>
+          <div class="consensus-score" id="score-num">—</div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-top:10px">
+          <div style="background:var(--ink3); border:1px solid var(--steel); border-radius:6px; padding:10px 12px">
+            <div style="font-size:10px; color:var(--mist); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px">Category</div>
+            <div style="font-size:13px; color:var(--fog)" id="demo-cat">Data Collection</div>
+          </div>
+          <div style="background:var(--ink3); border:1px solid var(--steel); border-radius:6px; padding:10px 12px">
+            <div style="font-size:10px; color:var(--mist); text-transform:uppercase; letter-spacing:0.06em; margin-bottom:4px">Verdict</div>
+            <div style="font-size:13px" id="demo-verdict">Scanning...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BADGE LEVELS -->
+<section id="badges" class="badges-section">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:1rem">
+      <div class="section-eyebrow reveal">Trust Levels</div>
+      <h2 class="section-title reveal">Five levels of verified trust</h2>
+      <p class="section-body reveal" style="margin:0 auto">Each badge represents a consensus audit score across three independent AI engines aligned with global privacy frameworks.</p>
+    </div>
+    <div class="badges-grid reveal">
+      <div class="badge-card-item">
+        <div class="badge-circle-item" style="background:#E1F5EE; border-color:#0F6E56">
+          <div class="badge-score-sm" style="color:#085041">92</div>
+        </div>
+        <div class="badge-name" style="color:#085041">Platinum</div>
+        <div class="badge-range">Score 85–100</div>
+        <div style="font-size:11px; color:var(--mist); margin-top:6px; line-height:1.5">Exceptional transparency. User-first ToS.</div>
+      </div>
+      <div class="badge-card-item">
+        <div class="badge-circle-item" style="background:#FAEEDA; border-color:#BA7517">
+          <div class="badge-score-sm" style="color:#633806">76</div>
+        </div>
+        <div class="badge-name" style="color:#BA7517">Gold</div>
+        <div class="badge-range">Score 70–84</div>
+        <div style="font-size:11px; color:var(--mist); margin-top:6px; line-height:1.5">Strong trust signals. Minor concerns only.</div>
+      </div>
+      <div class="badge-card-item">
+        <div class="badge-circle-item" style="background:#F1EFE8; border-color:#888780">
+          <div class="badge-score-sm" style="color:#444441">62</div>
+        </div>
+        <div class="badge-name" style="color:#888780">Silver</div>
+        <div class="badge-range">Score 55–69</div>
+        <div style="font-size:11px; color:var(--mist); margin-top:6px; line-height:1.5">Acceptable. Some clauses need attention.</div>
+      </div>
+      <div class="badge-card-item">
+        <div class="badge-circle-item" style="background:#FAECE7; border-color:#D85A30">
+          <div class="badge-score-sm" style="color:#712B13">47</div>
+        </div>
+        <div class="badge-name" style="color:#D85A30">Bronze</div>
+        <div class="badge-range">Score 40–54</div>
+        <div style="font-size:11px; color:var(--mist); margin-top:6px; line-height:1.5">Notable concerns. Partial trust.</div>
+      </div>
+      <div class="badge-card-item">
+        <div class="badge-circle-item" style="background:#FCEBEB; border-color:#E24B4A">
+          <div class="badge-score-sm" style="color:#791F1F">28</div>
+        </div>
+        <div class="badge-name" style="color:#E24B4A">Not Certified</div>
+        <div class="badge-range">Below 40</div>
+        <div style="font-size:11px; color:var(--mist); margin-top:6px; line-height:1.5">Significant risk clauses present.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUTHORITY -->
+<section id="authority">
+  <div class="container">
+    <div class="section-eyebrow reveal">Institutional Authority</div>
+    <h2 class="section-title reveal">Built on recognized<br>legal frameworks</h2>
+    <div class="gold-line reveal"></div>
+    <p class="section-body reveal">TOS Firewall scoring methodology is aligned with global privacy regulations and built towards institutional recognition. This is not a single AI's opinion — it is a structured audit against established legal standards.</p>
+    <div class="authority-grid" style="margin-top:3rem">
+      <div class="authority-card reveal">
+        <div class="authority-icon">⚖️</div>
+        <div class="authority-title">Legal Framework Alignment</div>
+        <div class="authority-desc">Scoring criteria maps to GDPR Articles 5–17, CCPA Sections 1798.100–1798.145, and India's DPDPA 2023 — the three most significant privacy frameworks globally.</div>
+      </div>
+      <div class="authority-card reveal">
+        <div class="authority-icon">🏛️</div>
+        <div class="authority-title">Law Firm Partnership</div>
+        <div class="authority-desc">Methodology reviewed and co-signed by a recognized Indian tech/privacy law firm. Legal advisory partnership in progress — ensuring our scoring reflects real legal standards.</div>
+        <div class="coming-soon-pill">Partnership In Progress</div>
+      </div>
+      <div class="authority-card reveal">
+        <div class="authority-icon">🇮🇳</div>
+        <div class="authority-title">NASSCOM / DSCI Alignment</div>
+        <div class="authority-desc">Seeking endorsement from India's Data Security Council (DSCI) — the authoritative body for data privacy standards in the Indian tech ecosystem.</div>
+        <div class="coming-soon-pill">Outreach In Progress</div>
+      </div>
+      <div class="authority-card reveal">
+        <div class="authority-icon">🌐</div>
+        <div class="authority-title">IAPP Framework</div>
+        <div class="authority-desc">Scoring criteria aligned with the International Association of Privacy Professionals (IAPP) CIPT curriculum — recognized globally by enterprise privacy teams.</div>
+        <div class="coming-soon-pill">Alignment In Progress</div>
+      </div>
+      <div class="authority-card reveal">
+        <div class="authority-icon">🔍</div>
+        <div class="authority-title">Quad-Engine Consensus</div>
+        <div class="authority-desc">Four independent AI systems — Claude, Gemini, GPT-4o, and Grok (xAI) — analyze every document simultaneously. A clause is only flagged when multiple engines agree, eliminating single-model bias and hallucination risk.</div>
+      </div>
+      <div class="authority-card reveal">
+        <div class="authority-icon">📋</div>
+        <div class="authority-title">Published Methodology</div>
+        <div class="authority-desc">Our full scoring methodology is publicly documented — every category, every weight, every flag criterion. No black boxes. Full transparency about how scores are produced.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHO IT'S FOR -->
+<section id="who" style="background:var(--ink2); border-top:1px solid var(--steel)">
+  <div class="container">
+    <div style="text-align:center; margin-bottom:0.5rem">
+      <div class="section-eyebrow reveal">Who It's For</div>
+      <h2 class="section-title reveal">Built for everyone who touches a Terms of Service</h2>
+    </div>
+    <div class="who-grid">
+      <div class="who-card reveal">
+        <div class="who-tag">SaaS Founders</div>
+        <div class="who-title">Turn your ToS into a conversion asset</div>
+        <div class="who-desc">Stop losing signups to trust anxiety. Display a verified multi-engine audit badge on your signup page. Show users your terms are clean before they have to trust your word for it.</div>
+      </div>
+      <div class="who-card reveal">
+        <div class="who-tag">Digital Agencies</div>
+        <div class="who-title">Add ToS auditing to your service stack</div>
+        <div class="who-desc">Bundle TOS Firewall into client website packages. Before any launch, audit your client's legal documents and deliver a trust score as part of your deliverable.</div>
+      </div>
+      <div class="who-card reveal">
+        <div class="who-tag">Legal & Compliance</div>
+        <div class="who-title">Vendor risk assessment at scale</div>
+        <div class="who-desc">Before onboarding any new SaaS tool, scan their ToS in 60 seconds. Know exactly what data rights your company is signing away on behalf of its employees.</div>
+      </div>
+      <div class="who-card reveal">
+        <div class="who-tag">Individual Users</div>
+        <div class="who-title">Understand what you're agreeing to</div>
+        <div class="who-desc">Paste any Terms of Service before you click "I Agree." Get a plain-English breakdown of what the company is actually asking for — in 60 seconds.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ASSOCIATIONS -->
+<div class="assoc-section">
+  <div class="container">
+    <div class="assoc-label">Aligned with — Partnerships in progress</div>
+    <div class="assoc-row">
+      <div class="assoc-item pending">NASSCOM</div>
+      <div class="assoc-item pending">DSCI India</div>
+      <div class="assoc-item pending">IAPP</div>
+      <div class="assoc-item pending">iSPIRT</div>
+      <div class="assoc-item pending">GDPR</div>
+      <div class="assoc-item active">CCPA</div>
+      <div class="assoc-item active">DPDPA 2023</div>
+    </div>
+  </div>
+</div>
+
+<!-- WAITLIST -->
+<section id="waitlist" class="waitlist-section">
+  <div class="waitlist-glow"></div>
+  <div class="container-sm">
+    <div class="waitlist-box reveal">
+      <div class="section-eyebrow" style="text-align:center">Early Access</div>
+      <h2 class="section-title" style="text-align:center; font-size:2.2rem">Be first to verify<br>your ToS</h2>
+      <p style="font-size:15px; color:var(--mist); text-align:center; margin-top:0.75rem; line-height:1.7">Join the waitlist. First 50 companies get free Platinum-tier scanning and a verified badge for 6 months.</p>
+      <div class="waitlist-form">
+        <input type="email" class="waitlist-input" id="email-input" placeholder="Enter your work email">
+        <button class="waitlist-btn" onclick="joinWaitlist()">Join Waitlist</button>
+      </div>
+      <div class="success-msg" id="success-msg">
+        ✓ You're on the list. We'll reach out within 48 hours with early access details.
+      </div>
+      <div class="waitlist-note">No spam. No credit card. First 50 companies get 6 months free.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-brand">
+    <div class="nav-shield" style="width:28px;height:28px;font-size:14px">🛡</div>
+    TOS Firewall
+  </div>
+  <div class="footer-copy">© 2026 TOS Firewall · Powered by NSDM AI · Pune, India</div>
+  <div class="footer-links">
+    <a href="#">Methodology</a>
+    <a href="#">Privacy</a>
+    <a href="#">Contact</a>
+  </div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting) { e.target.classList.add('visible'); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal, .step').forEach(el => observer.observe(el));
+
+// Engine animation demo
+const cats = ['Data Collection','AI Training','User Rights','Third Parties','Content Ownership','Transparency'];
+const verdicts = ['Analyzing...','Scanning...','Cross-checking...','Consensus reached','Flagging...','Verified'];
+const verdictColors = ['#8A95A8','#8A95A8','#8A95A8','#7DCEA0','#E8C97A','#7DCEA0'];
+const chips = [document.getElementById('chip1'), document.getElementById('chip2'), document.getElementById('chip3'), document.getElementById('chip4'), document.getElementById('chip5')];
+const fill = document.getElementById('score-fill');
+const scoreNum = document.getElementById('score-num');
+const catEl = document.getElementById('demo-cat');
+const verdictEl = document.getElementById('demo-verdict');
+
+let catIdx = 0;
+let score = 0;
+let targetScore = 78;
+
+function animateEngines() {
+  chips.forEach(c => { if(c) { c.classList.remove('active'); c.querySelector('.engine-dot').style.background = 'var(--steel2)'; }});
+  catEl.textContent = cats[catIdx % cats.length];
+  verdictEl.textContent = 'Scanning...';
+  verdictEl.style.color = '#8A95A8';
+
+  let delay = 0;
+  chips.forEach((chip, i) => {
+    if(!chip) return;
+    setTimeout(() => {
+      chip.classList.add('active');
+      chip.querySelector('.engine-dot').style.background = 'var(--gold)';
+    }, delay);
+    delay += 320;
+  });
+
+  setTimeout(() => {
+    verdictEl.textContent = 'Consensus reached';
+    verdictEl.style.color = '#7DCEA0';
+    catIdx++;
+    let s = Math.min(targetScore, score + 13);
+    score = s;
+    fill.style.width = score + '%';
+    scoreNum.textContent = score;
+  }, 2000);
+}
+
+setInterval(animateEngines, 3500);
+setTimeout(animateEngines, 800);
+
+// Score count up
+setTimeout(() => {
+  fill.style.width = '0%';
+  score = 0;
+}, 500);
+
+// Waitlist
+function joinWaitlist() {
+  const email = document.getElementById('email-input').value.trim();
+  if (!email || !email.includes('@')) {
+    document.getElementById('email-input').style.borderColor = 'var(--red)';
+    return;
+  }
+  document.getElementById('email-input').style.borderColor = 'var(--gold)';
+  document.getElementById('success-msg').style.display = 'block';
+  document.getElementById('email-input').value = '';
+  document.querySelector('.waitlist-btn').textContent = '✓ Joined';
+  document.querySelector('.waitlist-btn').style.background = '#27AE60';
+}
+</script>
+</body>
+</html>

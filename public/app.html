@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TOS Firewall — Generate, Score & Verify</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.34.0/dist/tabler-icons.min.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0D1117;--ink2:#161B22;--ink3:#1C2333;
+  --navy:#1E3A5F;--navy2:#2A4F80;
+  --gold:#C9A84C;--gold2:#E8C97A;--gold3:#F5E4B0;
+  --steel:#2A3244;--steel2:#364057;
+  --mist:#8A95A8;--fog:#C4CAD6;--white:#F0F2F5;
+  --green:#1E8449;--green-l:#EAF3DE;--green-d:#27500A;
+  --amber:#BA7517;--amber-l:#FAEEDA;--amber-d:#633806;
+  --red:#C0392B;--red-l:#FCEBEB;--red-d:#791F1F;
+  --r:8px;--r-lg:14px;
+}
+html{scroll-behavior:smooth}
+body{background:var(--ink);color:var(--fog);font-family:'DM Sans',sans-serif;font-weight:300;line-height:1.7;min-height:100vh;overflow-x:hidden}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;background:rgba(13,17,23,0.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(201,168,76,0.15)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.nav-shield{width:32px;height:32px;background:var(--navy);border:1.5px solid var(--gold);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.nav-name{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:500;color:var(--white);letter-spacing:0.02em}
+.nav-tag{font-size:10px;background:rgba(201,168,76,0.15);color:var(--gold2);padding:2px 8px;border-radius:20px;border:1px solid rgba(201,168,76,0.3);letter-spacing:0.06em}
+
+/* TABS */
+.tabs{display:flex;gap:0;background:var(--ink2);border-bottom:1px solid var(--steel)}
+.tab{flex:1;padding:14px;font-size:13px;font-weight:400;color:var(--mist);border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:0.04em;text-transform:uppercase;border-bottom:2px solid transparent;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.tab:hover{color:var(--fog);background:rgba(255,255,255,0.03)}
+.tab.active{color:var(--gold2);border-bottom-color:var(--gold);background:rgba(201,168,76,0.05)}
+.tab-content{display:none;animation:fadeIn 0.3s ease}
+.tab-content.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* CONTAINERS */
+.container{max-width:860px;margin:0 auto;padding:2.5rem 1.5rem}
+.card{background:var(--ink2);border:1px solid var(--steel);border-radius:var(--r-lg);padding:2rem;margin-bottom:1.25rem}
+.card-title{font-size:11px;font-weight:500;color:var(--mist);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px}
+.card-title i{font-size:16px;color:var(--gold)}
+
+/* FORM */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;color:var(--mist);letter-spacing:0.04em;text-transform:uppercase;font-weight:500}
+input,select,textarea{background:var(--ink3);border:1px solid var(--steel2);border-radius:var(--r);padding:11px 14px;color:var(--white);font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color 0.2s;width:100%}
+input::placeholder,textarea::placeholder{color:var(--mist)}
+input:focus,select:focus,textarea:focus{border-color:var(--gold)}
+select option{background:var(--ink3);color:var(--white)}
+textarea{min-height:80px;resize:vertical;line-height:1.6}
+
+/* TOGGLE GROUP */
+.toggle-group{display:flex;gap:8px}
+.toggle-btn{flex:1;padding:9px;background:var(--ink3);border:1px solid var(--steel2);border-radius:var(--r);color:var(--mist);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;text-align:center}
+.toggle-btn.active{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold2)}
+
+/* DOC TYPE SELECTOR */
+.doc-types{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:1.25rem}
+.doc-type{background:var(--ink3);border:1px solid var(--steel2);border-radius:var(--r);padding:12px 8px;text-align:center;cursor:pointer;transition:all 0.15s}
+.doc-type:hover{border-color:var(--steel)}
+.doc-type.selected{background:rgba(201,168,76,0.08);border-color:var(--gold)}
+.doc-type i{font-size:20px;color:var(--mist);display:block;margin-bottom:6px}
+.doc-type.selected i{color:var(--gold2)}
+.doc-type span{font-size:11px;color:var(--mist);letter-spacing:0.04em}
+.doc-type.selected span{color:var(--fog)}
+
+/* GENERATE BTN */
+.gen-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--navy),var(--navy2));border:1px solid var(--gold);border-radius:var(--r);color:var(--gold2);font-size:14px;font-weight:500;font-family:'DM Sans',sans-serif;letter-spacing:0.06em;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:10px;margin-top:1rem;text-transform:uppercase}
+.gen-btn:hover{background:linear-gradient(135deg,var(--navy2),#3A6FA0);box-shadow:0 4px 20px rgba(201,168,76,0.15)}
+.gen-btn:disabled{opacity:0.5;cursor:not-allowed}
+
+/* LOADING */
+.loading-box{text-align:center;padding:3rem;display:none}
+.spinner{width:36px;height:36px;border:2.5px solid var(--steel);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 1rem}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{font-size:13px;color:var(--mist)}
+
+/* RESULT AREA */
+.result-area{display:none}
+
+/* DOC OUTPUT */
+.doc-output{background:var(--ink3);border:1px solid var(--steel);border-radius:var(--r);padding:1.5rem;font-size:13px;line-height:1.8;color:var(--fog);white-space:pre-wrap;font-family:'DM Mono',monospace;max-height:400px;overflow-y:auto;margin-bottom:1rem}
+.doc-output::-webkit-scrollbar{width:4px}
+.doc-output::-webkit-scrollbar-track{background:var(--ink3)}
+.doc-output::-webkit-scrollbar-thumb{background:var(--steel2);border-radius:2px}
+
+/* ACTION BAR */
+.action-bar{display:flex;gap:8px;margin-bottom:1.5rem}
+.action-btn{padding:9px 18px;background:var(--ink3);border:1px solid var(--steel2);border-radius:var(--r);color:var(--fog);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s;display:flex;align-items:center;gap:6px}
+.action-btn:hover{border-color:var(--mist);color:var(--white)}
+.action-btn.primary{background:rgba(201,168,76,0.1);border-color:var(--gold);color:var(--gold2)}
+.action-btn.primary:hover{background:rgba(201,168,76,0.2)}
+
+/* SCORE SECTION */
+.score-section{display:none}
+.badge-hero{display:flex;align-items:center;gap:1.5rem;padding:1.5rem;background:var(--ink2);border-radius:var(--r-lg);margin-bottom:1.25rem}
+.badge-circle{width:80px;height:80px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0;border:2.5px solid}
+.badge-score{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:600;line-height:1}
+.badge-denom{font-size:10px;font-weight:400;opacity:0.7}
+.badge-info h3{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;color:var(--white);margin-bottom:4px}
+.badge-level-pill{display:inline-block;font-size:11px;font-weight:500;padding:2px 10px;border-radius:20px;margin-bottom:6px;letter-spacing:0.06em;text-transform:uppercase}
+.badge-summary{font-size:13px;color:var(--mist);line-height:1.6}
+
+/* CATEGORY BARS */
+.cats{display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem}
+.cat-item{background:var(--ink2);border:1px solid var(--steel);border-radius:var(--r);overflow:hidden}
+.cat-header{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;cursor:pointer}
+.cat-header:hover{background:rgba(255,255,255,0.02)}
+.cat-name{font-size:13px;font-weight:500;color:var(--fog)}
+.cat-weight{font-size:11px;color:var(--mist);margin-top:1px}
+.cat-right{display:flex;align-items:center;gap:8px}
+.cat-num{font-size:14px;font-weight:500}
+.status-pill{font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:0.04em}
+.chevron{font-size:16px;color:var(--mist);transition:transform 0.2s}
+.chevron.open{transform:rotate(180deg)}
+.cat-body{padding:0 14px 12px;border-top:1px solid var(--steel)}
+.bar-bg{height:5px;background:var(--steel);border-radius:3px;margin:10px 0 8px}
+.bar-fill{height:5px;border-radius:3px;transition:width 0.8s ease}
+.cat-sum{font-size:12px;color:var(--mist);line-height:1.6;margin-bottom:8px}
+.flags{display:flex;flex-direction:column;gap:5px}
+.flag{border-radius:6px;padding:8px 10px;font-size:12px;border-left:3px solid}
+.flag-clause{font-weight:500;margin-bottom:2px;color:var(--fog);font-style:italic;line-height:1.5}
+.flag-plain{color:var(--mist);line-height:1.5}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.mini-card{background:var(--ink2);border:1px solid var(--steel);border-radius:var(--r);padding:1rem 1.25rem}
+.mini-title{font-size:12px;font-weight:500;margin-bottom:8px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:0.05em}
+.mini-list{list-style:disc;padding-left:16px}
+.mini-list li{font-size:12px;color:var(--mist);line-height:1.7}
+
+/* EMBED */
+.embed-card{background:var(--ink2);border:1px solid var(--steel);border-radius:var(--r);padding:1rem 1.25rem;margin-bottom:1.25rem}
+.embed-code{background:var(--ink);color:#00FF88;font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;border-radius:var(--r);word-break:break-all;line-height:1.6;margin-top:8px}
+
+/* IMPROVE BTN */
+.improve-btn{width:100%;padding:12px;background:rgba(30,132,73,0.15);border:1px solid var(--green);border-radius:var(--r);color:#7DCEA0;font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;transition:all 0.2s;margin-bottom:8px}
+.improve-btn:hover{background:rgba(30,132,73,0.25)}
+.reset-btn{width:100%;padding:11px;background:var(--ink2);border:1px solid var(--steel);border-radius:var(--r);color:var(--mist);font-size:13px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all 0.15s}
+.reset-btn:hover{border-color:var(--steel2);color:var(--fog)}
+
+/* SCAN TAB */
+.scan-paste{width:100%;min-height:180px;background:var(--ink3);border:1px solid var(--steel2);border-radius:var(--r);padding:14px;color:var(--white);font-size:13px;font-family:'DM Mono',monospace;outline:none;resize:vertical;line-height:1.7}
+.scan-paste:focus{border-color:var(--gold)}
+.scan-samples{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.sample-pill{font-size:11px;padding:4px 12px;border-radius:20px;background:var(--ink3);border:1px solid var(--steel2);cursor:pointer;color:var(--mist);transition:all 0.15s}
+.sample-pill:hover{border-color:var(--steel);color:var(--fog)}
+
+/* REC BAR */
+.rec-bar{padding:12px 16px;border-radius:var(--r);font-size:13px;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;font-weight:500}
+
+/* SECTION DIVIDER */
+.sec-label{font-size:11px;font-weight:500;color:var(--mist);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--steel)}
+
+/* TOAST */
+.toast{position:fixed;bottom:2rem;right:2rem;background:var(--ink2);border:1px solid var(--gold);border-radius:var(--r);padding:12px 20px;font-size:13px;color:var(--gold2);z-index:999;display:none;animation:slideUp 0.3s ease}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+
+/* MOBILE */
+@media(max-width:640px){
+  .form-grid{grid-template-columns:1fr}
+  .doc-types{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  nav{padding:0 1rem}
+  .container{padding:1.5rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="#" class="nav-logo">
+    <div class="nav-shield">🛡</div>
+    <span class="nav-name">TOS Firewall</span>
+  </a>
+  <span class="nav-tag">Beta · v1.0</span>
+</nav>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchTab('generate')">
+    <i class="ti ti-file-plus"></i> Generate & Score
+  </button>
+  <button class="tab" onclick="switchTab('scan')">
+    <i class="ti ti-shield-search"></i> Scan Existing
+  </button>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- TAB 1: GENERATE & SCORE -->
+<!-- ════════════════════════════════════════ -->
+<div id="tab-generate" class="tab-content active">
+<div class="container">
+
+  <div id="gen-form-section">
+    <!-- Doc type selector -->
+    <div class="card">
+      <div class="card-title"><i class="ti ti-files"></i> What do you need to generate?</div>
+      <div class="doc-types">
+        <div class="doc-type selected" data-doc="terms" onclick="toggleDoc(this)">
+          <i class="ti ti-file-text"></i>
+          <span>Terms of Service</span>
+        </div>
+        <div class="doc-type" data-doc="privacy" onclick="toggleDoc(this)">
+          <i class="ti ti-lock"></i>
+          <span>Privacy Policy</span>
+        </div>
+        <div class="doc-type" data-doc="cookie" onclick="toggleDoc(this)">
+          <i class="ti ti-cookie"></i>
+          <span>Cookie Policy</span>
+        </div>
+        <div class="doc-type" data-doc="refund" onclick="toggleDoc(this)">
+          <i class="ti ti-receipt-refund"></i>
+          <span>Refund Policy</span>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--mist)">Select one or more documents to generate</div>
+    </div>
+
+    <!-- Company questionnaire -->
+    <div class="card">
+      <div class="card-title"><i class="ti ti-building"></i> Tell us about your company</div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Company / Product Name</label>
+          <input type="text" id="q-name" placeholder="e.g. Acme SaaS">
+        </div>
+        <div class="form-group">
+          <label>Website URL</label>
+          <input type="text" id="q-url" placeholder="e.g. acme.com">
+        </div>
+        <div class="form-group">
+          <label>Country of Incorporation</label>
+          <select id="q-country">
+            <option value="">Select country</option>
+            <option value="India">India</option>
+            <option value="United States">United States</option>
+            <option value="United Kingdom">United Kingdom</option>
+            <option value="Australia">Australia</option>
+            <option value="UAE">UAE</option>
+            <option value="Singapore">Singapore</option>
+            <option value="Canada">Canada</option>
+            <option value="Germany">Germany</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Business Type</label>
+          <select id="q-type">
+            <option value="">Select type</option>
+            <option value="SaaS / Software">SaaS / Software</option>
+            <option value="E-commerce">E-commerce</option>
+            <option value="Marketplace">Marketplace</option>
+            <option value="Mobile App">Mobile App</option>
+            <option value="Agency / Services">Agency / Services</option>
+            <option value="Media / Content">Media / Content</option>
+            <option value="Education / EdTech">Education / EdTech</option>
+            <option value="FinTech">FinTech</option>
+            <option value="HealthTech">HealthTech</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>What does your product do? (one sentence)</label>
+          <input type="text" id="q-desc" placeholder="e.g. We help marketing teams schedule and analyze social media posts">
+        </div>
+        <div class="form-group">
+          <label>Do you collect payments?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn active" id="pay-yes" onclick="setToggle('pay','yes')">Yes</button>
+            <button class="toggle-btn" id="pay-no" onclick="setToggle('pay','no')">No</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Do you use AI in your product?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" id="ai-yes" onclick="setToggle('ai','yes')">Yes</button>
+            <button class="toggle-btn active" id="ai-no" onclick="setToggle('ai','no')">No</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Do you have users under 18?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" id="minor-yes" onclick="setToggle('minor','yes')">Yes</button>
+            <button class="toggle-btn active" id="minor-no" onclick="setToggle('minor','no')">No</button>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Do you collect user-generated content?</label>
+          <div class="toggle-group">
+            <button class="toggle-btn" id="ugc-yes" onclick="setToggle('ugc','yes')">Yes</button>
+            <button class="toggle-btn active" id="ugc-no" onclick="setToggle('ugc','no')">No</button>
+          </div>
+        </div>
+        <div class="form-group full">
+          <label>Contact email for legal notices</label>
+          <input type="email" id="q-email" placeholder="e.g. legal@acme.com">
+        </div>
+      </div>
+      <button class="gen-btn" id="gen-btn" onclick="generateDocs()">
+        <i class="ti ti-sparkles"></i>
+        Generate Documents & Score Instantly
+      </button>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div class="loading-box" id="gen-loading">
+    <div class="spinner"></div>
+    <div class="loading-msg" id="gen-loading-msg">Generating your documents...</div>
+  </div>
+
+  <!-- Results -->
+  <div class="result-area" id="gen-result">
+
+    <!-- Score section -->
+    <div id="score-section" class="score-section">
+      <div class="sec-label"><i class="ti ti-chart-bar" style="color:var(--gold)"></i> Trust Score</div>
+      <div id="score-badge-hero" class="badge-hero"></div>
+      <div id="score-rec-bar" class="rec-bar"></div>
+      <div class="sec-label"><i class="ti ti-list-check" style="color:var(--gold)"></i> Breakdown</div>
+      <div class="cats" id="score-cats"></div>
+      <div class="two-col" id="score-rp"></div>
+      <div class="embed-card" id="score-embed" style="display:none">
+        <div class="sec-label" style="margin-bottom:8px"><i class="ti ti-code" style="color:var(--gold)"></i> Embed your badge</div>
+        <div style="font-size:12px;color:var(--mist);margin-bottom:4px">Add to your signup page:</div>
+        <div class="embed-code" id="embed-code-text"></div>
+      </div>
+    </div>
+
+    <!-- Document output -->
+    <div class="sec-label" id="doc-section-label" style="margin-top:1.5rem"><i class="ti ti-file-text" style="color:var(--gold)"></i> Generated Document</div>
+    <div class="action-bar">
+      <button class="action-btn primary" onclick="copyDoc()"><i class="ti ti-copy"></i> Copy</button>
+      <button class="action-btn" onclick="downloadDoc()"><i class="ti ti-download"></i> Download .txt</button>
+      <button class="action-btn" onclick="showImprovePanel()"><i class="ti ti-wand"></i> Improve Score</button>
+    </div>
+    <div class="doc-output" id="doc-output"></div>
+
+    <!-- Improvement -->
+    <div id="improve-panel" style="display:none;margin-bottom:1rem">
+      <div class="card" style="border-color:rgba(30,132,73,0.3);background:rgba(30,132,73,0.05)">
+        <div class="card-title" style="color:#7DCEA0"><i class="ti ti-arrow-up-circle"></i> Improve Your Score</div>
+        <div style="font-size:13px;color:var(--mist);margin-bottom:1rem" id="improve-suggestions"></div>
+        <button class="improve-btn" onclick="improveDoc()">
+          <i class="ti ti-refresh"></i> Regenerate with Improvements Applied
+        </button>
+      </div>
+    </div>
+
+    <button class="reset-btn" onclick="resetGenerator()">
+      <i class="ti ti-arrow-left"></i> Generate another document
+    </button>
+  </div>
+
+</div>
+</div>
+
+<!-- ════════════════════════════════════════ -->
+<!-- TAB 2: SCAN EXISTING -->
+<!-- ════════════════════════════════════════ -->
+<div id="tab-scan" class="tab-content">
+<div class="container">
+
+  <div id="scan-form-section">
+    <div class="card">
+      <div class="card-title"><i class="ti ti-clipboard-text"></i> Paste your existing ToS</div>
+      <div style="font-size:12px;color:var(--mist);margin-bottom:10px">Try a sample or paste your own document</div>
+      <div class="scan-samples">
+        <span class="sample-pill" onclick="loadSample('friendly')">Friendly SaaS sample</span>
+        <span class="sample-pill" onclick="loadSample('aggressive')">Aggressive / data-hungry</span>
+        <span class="sample-pill" onclick="loadSample('minimal')">Minimal startup</span>
+      </div>
+      <textarea class="scan-paste" id="scan-input" placeholder="Paste Terms of Service text here (minimum 100 characters)..."></textarea>
+      <button class="gen-btn" id="scan-btn" onclick="runScan()" style="margin-top:0.75rem">
+        <i class="ti ti-shield-search"></i>
+        Analyze with Quad-Engine AI
+      </button>
+    </div>
+  </div>
+
+  <div class="loading-box" id="scan-loading">
+    <div class="spinner"></div>
+    <div class="loading-msg" id="scan-loading-msg">Reading document...</div>
+  </div>
+
+  <div id="scan-result" style="display:none"></div>
+
+</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── STATE ── */
+const state = {
+  selectedDocs: new Set(['terms']),
+  toggles: { pay:'yes', ai:'no', minor:'no', ugc:'no' },
+  generatedDoc: '',
+  currentScore: null,
+  companySlug: ''
+};
+
+/* ── SAMPLES ── */
+const SAMPLES = {
+  friendly:`TERMS OF SERVICE — ClearDash Analytics\nLast Updated: March 2026\n\n1. DATA COLLECTION\nWe collect only what we need: your email, account settings, and anonymized usage data. We will never sell your personal data to third parties. We don't work with advertising networks.\n\n2. AI AND YOUR DATA\nYour content is never used to train our AI models. You can opt out of all AI-assisted features at any time.\n\n3. YOUR RIGHTS\nYou own your data. You can export everything. You can delete your account and all data within 24 hours. We comply fully with GDPR and CCPA.\n\n4. THIRD PARTIES\nWe use AWS for hosting, Stripe for payments, Postmark for email only. No advertising partners. No data brokers.\n\n5. CONTENT OWNERSHIP\nYou own everything you create. Data purged within 30 days of account closure.\n\n6. CHANGES\nWe will email you 30 days before any material changes.`,
+  aggressive:`TERMS OF SERVICE — DataMax Pro\n\n1. YOUR DATA\nBy using DataMax Pro, you grant us and our advertising partners a perpetual, irrevocable, worldwide license to use, reproduce, and monetize your content and personal information. We may share your data with third-party advertising networks, data brokers, and affiliated companies.\n\n2. AI TRAINING\nYour content and data may be used to train our machine learning models. You cannot opt out of this processing.\n\n3. YOUR RIGHTS\nAll disputes must be resolved through binding arbitration. You waive your right to a jury trial and to participate in any class action lawsuit. We may terminate your account at any time without notice. Data retained for 7 years after closure.\n\n4. THIRD PARTIES\nWe share data with advertising partners, analytics companies, and social media platforms. A full list is not provided.\n\n5. CHANGES\nWe may update these terms at any time. Continued use constitutes acceptance.`,
+  minimal:`TERMS OF SERVICE — Notely\n\nNotely is a note-taking app. We store your notes to sync them. We don't sell your data.\n\nYou can delete your account by emailing us. We'll remove your data within 90 days.\n\nDon't use Notely for illegal things.\n\nWe may change these terms. Check back occasionally.\n\nQuestions? hello@notely.app`
+};
+
+/* ── SCORING CONFIG ── */
+const BADGE_CFG = {
+  PLATINUM:{bg:'rgba(14,110,86,0.15)',border:'#0F6E56',color:'#7DCEA0',pill_bg:'rgba(14,110,86,0.2)',pill_c:'#7DCEA0',label:'Platinum'},
+  GOLD:{bg:'rgba(186,117,23,0.15)',border:'#BA7517',color:'#E8C97A',pill_bg:'rgba(186,117,23,0.2)',pill_c:'#E8C97A',label:'Gold'},
+  SILVER:{bg:'rgba(136,135,128,0.15)',border:'#888780',color:'#C4CAD6',pill_bg:'rgba(136,135,128,0.2)',pill_c:'#C4CAD6',label:'Silver'},
+  BRONZE:{bg:'rgba(216,90,48,0.15)',border:'#D85A30',color:'#F0A882',pill_bg:'rgba(216,90,48,0.2)',pill_c:'#F0A882',label:'Bronze'},
+  NOT_CERTIFIED:{bg:'rgba(192,57,43,0.15)',border:'#C0392B',color:'#F1948A',pill_bg:'rgba(192,57,43,0.2)',pill_c:'#F1948A',label:'Not Certified'},
+};
+const STATUS_CFG = {
+  PASS:{bg:'rgba(39,160,74,0.15)',c:'#7DCEA0',l:'Pass'},
+  WARN:{bg:'rgba(186,117,23,0.15)',c:'#E8C97A',l:'Warn'},
+  FAIL:{bg:'rgba(192,57,43,0.15)',c:'#F1948A',l:'Fail'},
+};
+const FLAG_CFG = {
+  RED:{bg:'rgba(192,57,43,0.1)',border:'#C0392B'},
+  YELLOW:{bg:'rgba(186,117,23,0.1)',border:'#BA7517'},
+  GREEN:{bg:'rgba(39,160,74,0.1)',border:'#27AE60'},
+};
+const BAR_CFG = {PASS:'#27AE60',WARN:'#BA7517',FAIL:'#C0392B'};
+const REC_CFG = {
+  CERTIFY:{bg:'rgba(39,160,74,0.12)',border:'1px solid #27AE60',c:'#7DCEA0',icon:'ti-circle-check',t:'Recommended for TOS Firewall certification.'},
+  CERTIFY_WITH_WARNINGS:{bg:'rgba(186,117,23,0.12)',border:'1px solid #BA7517',c:'#E8C97A',icon:'ti-alert-triangle',t:'Certifiable with improvements recommended.'},
+  DO_NOT_CERTIFY:{bg:'rgba(192,57,43,0.12)',border:'1px solid #C0392B',c:'#F1948A',icon:'ti-x',t:'Not recommended for certification. Significant issues found.'},
+};
+
+/* ── SYSTEM PROMPTS ── */
+const SCORE_SYSTEM = `You are TOS Firewall, an expert AI legal analyst. Analyze Terms of Service documents against a proprietary scoring methodology.
+
+CRITICAL: Respond with ONLY valid JSON. No markdown, no preamble.
+
+SCORING (score each category 0-100):
+1. Data Collection & Usage (weight:25) - Is collection minimal? No selling? User control?
+2. AI Training on User Content (weight:20) - Opt-out available? Never trains on user content?
+3. User Rights & Control (weight:20) - Delete/export rights? No mandatory arbitration?
+4. Third-Party Data Sharing (weight:15) - Named providers only? No ad networks or brokers?
+5. Content Ownership & Termination (weight:10) - User owns content? Data deleted on closure?
+6. Transparency & Readability (weight:10) - Plain language? Change notifications? Last updated date?
+
+RED FLAGS (cut scores): selling data, AI training without opt-out, arbitration waivers, class action waivers, data brokers, perpetual irrevocable licenses, no deletion on closure, unnamed ad partners.
+GREEN FLAGS (raise scores): explicit no-sell, AI opt-out, right to delete within 30 days, named providers only, 30-day change notice, plain language summary.
+
+BADGE: PLATINUM=85-100, GOLD=70-84, SILVER=55-69, BRONZE=40-54, NOT_CERTIFIED=below 40
+STATUS: PASS if score>=70, WARN if 45-69, FAIL below 45
+total_score = round(sum of score*weight/100)
+
+Return ONLY this JSON:
+{"total_score":<int>,"badge_level":"PLATINUM|GOLD|SILVER|BRONZE|NOT_CERTIFIED","company_name":"<name or Unknown>","summary":"<2 sentence verdict>","recommendation":"CERTIFY|CERTIFY_WITH_WARNINGS|DO_NOT_CERTIFY","categories":[{"name":"<name>","weight":<int>,"score":<int>,"status":"PASS|WARN|FAIL","summary":"<one sentence>","flags":[{"severity":"RED|YELLOW|GREEN","clause":"<exact text max 40 words>","plain_english":"<plain explanation>"}]}],"top_risks":["<r1>","<r2>","<r3>"],"top_positives":["<p1>","<p2>"],"improve_suggestions":["<what to fix 1>","<what to fix 2>","<what to fix 3>"]}`;
+
+const GEN_SYSTEM = `You are TOS Firewall's document generation engine. You generate legally-structured, user-friendly legal documents for digital companies.
+
+CRITICAL RULES:
+1. Generate documents that score HIGH on TOS Firewall's trust methodology (aim for Gold or Platinum)
+2. Include explicit user-friendly clauses: no-sell pledge, right to delete, named third parties only, 30-day change notice
+3. If company uses AI, include explicit AI opt-out clause
+4. Use plain language — avoid excessive legalese
+5. Include specific company details from the questionnaire
+6. Add "Last Updated: [current month year]" at the top
+7. Return ONLY the document text — no preamble, no JSON, no explanation
+8. Disclaimer at end: "Generated by TOS Firewall AI — Review with a qualified lawyer before publishing"`;
+
+/* ── UI HELPERS ── */
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', ['generate','scan'][i]===tab));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+}
+
+function toggleDoc(el) {
+  const doc = el.dataset.doc;
+  if(state.selectedDocs.has(doc) && state.selectedDocs.size > 1) {
+    state.selectedDocs.delete(doc);
+    el.classList.remove('selected');
+    el.querySelector('i').style.color='';
+    el.querySelector('span').style.color='';
+  } else {
+    state.selectedDocs.add(doc);
+    el.classList.add('selected');
+  }
+}
+
+function setToggle(key, val) {
+  state.toggles[key] = val;
+  document.getElementById(key+'-yes').classList.toggle('active', val==='yes');
+  document.getElementById(key+'-no').classList.toggle('active', val==='no');
+}
+
+function loadSample(k) { document.getElementById('scan-input').value = SAMPLES[k]; }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => t.style.display='none', 2500);
+}
+
+function toggleCat(i) {
+  const body = document.getElementById('cb-'+i);
+  const chev = document.getElementById('ch-'+i);
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  chev.className = 'chevron ti ti-chevron-down' + (open ? '' : ' open');
+}
+
+/* ── LOADING MESSAGES ── */
+const GEN_MSGS = ['Analyzing your company profile...','Drafting user-friendly clauses...','Adding legal framework alignment...','Scoring against methodology...','Finalizing your document...'];
+const SCAN_MSGS = ['Reading document structure...','Analyzing data collection clauses...','Checking AI training policies...','Evaluating user rights...','Scanning third-party sharing...','Running consensus scoring...'];
+
+function startLoadingMsg(el, msgs) {
+  let i=0;
+  el.textContent = msgs[0];
+  return setInterval(() => { i=(i+1)%msgs.length; el.textContent=msgs[i]; }, 2000);
+}
+
+/* ── GENERATE DOCS ── */
+async function generateDocs() {
+  const name = document.getElementById('q-name').value.trim();
+  const url = document.getElementById('q-url').value.trim();
+  const country = document.getElementById('q-country').value;
+  const type = document.getElementById('q-type').value;
+  const desc = document.getElementById('q-desc').value.trim();
+  const email = document.getElementById('q-email').value.trim();
+
+  if (!name || !desc) { showToast('Please fill in company name and description'); return; }
+  if (state.selectedDocs.size === 0) { showToast('Please select at least one document type'); return; }
+
+  state.companySlug = name.toLowerCase().replace(/[^a-z0-9]+/g,'-');
+
+  const docLabels = {terms:'Terms of Service',privacy:'Privacy Policy',cookie:'Cookie Policy',refund:'Refund Policy'};
+  const selectedLabels = [...state.selectedDocs].map(d=>docLabels[d]).join(', ');
+
+  const prompt = `Generate a ${selectedLabels} for the following company:
+
+Company Name: ${name}
+Website: ${url || 'Not specified'}
+Country: ${country || 'Not specified'}
+Business Type: ${type || 'Not specified'}
+Product Description: ${desc}
+Accepts Payments: ${state.toggles.pay === 'yes' ? 'Yes' : 'No'}
+Uses AI: ${state.toggles.ai === 'yes' ? 'Yes' : 'No'}
+Has Minor Users: ${state.toggles.minor === 'yes' ? 'Yes' : 'No'}
+User-Generated Content: ${state.toggles.ugc === 'yes' ? 'Yes' : 'No'}
+Legal Contact Email: ${email || 'legal@'+((url||name.toLowerCase().replace(/\s/g,'')+'.com'))}
+
+Generate a comprehensive, user-friendly ${selectedLabels} that scores GOLD or PLATINUM on TOS Firewall's trust scoring methodology. Make it specific to this company.`;
+
+  document.getElementById('gen-btn').disabled = true;
+  document.getElementById('gen-loading').style.display = 'block';
+  const interval = startLoadingMsg(document.getElementById('gen-loading-msg'), GEN_MSGS);
+
+  try {
+    const resp = await fetch('/api/generate', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ prompt })
+    });
+    clearInterval(interval);
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message||'API error');
+    state.generatedDoc = data.document || data.content?.[0]?.text || data;
+
+    // Now score it
+    document.getElementById('gen-loading-msg').textContent = 'Scoring your document...';
+    await scoreDocument(state.generatedDoc, 'gen');
+
+  } catch(e) {
+    clearInterval(interval);
+    document.getElementById('gen-loading').style.display = 'none';
+    document.getElementById('gen-btn').disabled = false;
+    showToast('Error: ' + e.message);
+  }
+}
+
+/* ── SCORE DOCUMENT ── */
+async function scoreDocument(text, mode) {
+  try {
+    const resp = await fetch('/api/score', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:2000,
+        temperature:0.1,
+        system: SCORE_SYSTEM,
+        messages:[{role:'user',content:'Analyze this document and return ONLY the JSON:\n\n'+text.substring(0,40000)}]
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message||'Score API error');
+    const raw = typeof data === 'object' && data.total_score ? JSON.stringify(data) : (data.content?.[0]?.text || '{}').replace(/```json/g,'').replace(/```/g,'').trim();
+    const report = JSON.parse(raw);
+    state.currentScore = report;
+
+    if (mode === 'gen') {
+      document.getElementById('gen-loading').style.display = 'none';
+      document.getElementById('gen-form-section').style.display = 'none';
+      document.getElementById('gen-result').style.display = 'block';
+      document.getElementById('gen-btn').disabled = false;
+      renderScore(report, 'score-section', 'score-badge-hero', 'score-rec-bar', 'score-cats', 'score-rp', 'score-embed', 'embed-code-text');
+      document.getElementById('score-section').style.display = 'block';
+      document.getElementById('doc-output').textContent = state.generatedDoc;
+      buildImproveSuggestions(report);
+    } else {
+      document.getElementById('scan-loading').style.display = 'none';
+      document.getElementById('scan-form-section').style.display = 'none';
+      renderScanResult(report);
+    }
+  } catch(e) {
+    document.getElementById('gen-loading').style.display = 'none';
+    document.getElementById('scan-loading').style.display = 'none';
+    document.getElementById('gen-btn').disabled = false;
+    document.getElementById('scan-btn').disabled = false;
+    showToast('Scoring error: ' + e.message);
+  }
+}
+
+/* ── RENDER SCORE ── */
+function renderScore(r, secId, heroId, recId, catsId, rpId, embedId, embedCodeId) {
+  const b = BADGE_CFG[r.badge_level] || BADGE_CFG.NOT_CERTIFIED;
+  const rec = REC_CFG[r.recommendation] || REC_CFG.DO_NOT_CERTIFY;
+
+  // Badge hero
+  document.getElementById(heroId).innerHTML = `
+    <div class="badge-circle" style="background:${b.bg};border-color:${b.border}">
+      <div class="badge-score" style="color:${b.color}">${r.total_score}</div>
+      <div class="badge-denom" style="color:${b.color}">/100</div>
+    </div>
+    <div class="badge-info">
+      <div class="badge-level-pill" style="background:${b.pill_bg};color:${b.pill_c}">${b.label}</div>
+      <h3>${r.company_name||'Your Company'}</h3>
+      <div class="badge-summary">${r.summary}</div>
+    </div>`;
+
+  // Rec bar
+  document.getElementById(recId).innerHTML = `<i class="ti ${rec.icon}" style="font-size:16px"></i>${rec.t}`;
+  document.getElementById(recId).style.cssText = `background:${rec.bg};border:${rec.border};color:${rec.c};padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:1.25rem;display:flex;align-items:center;gap:8px;font-weight:500`;
+
+  // Categories
+  let cHtml = '';
+  (r.categories||[]).forEach((cat,i) => {
+    const st = STATUS_CFG[cat.status]||STATUS_CFG.WARN;
+    const bc = BAR_CFG[cat.status]||BAR_CFG.WARN;
+    let flagsHtml = (cat.flags||[]).map(f => {
+      const fc = FLAG_CFG[f.severity]||FLAG_CFG.YELLOW;
+      return `<div class="flag" style="background:${fc.bg};border-left-color:${fc.border}">
+        <div class="flag-clause">"${f.clause}"</div>
+        <div class="flag-plain">${f.plain_english}</div>
+      </div>`;
+    }).join('');
+    cHtml += `<div class="cat-item">
+      <div class="cat-header" onclick="toggleCat(${i})">
+        <div><div class="cat-name">${cat.name}</div><div class="cat-weight">Weight: ${cat.weight}% · ${Math.round(cat.score*cat.weight/100)} pts contributed</div></div>
+        <div class="cat-right">
+          <span class="cat-num" style="color:${bc}">${cat.score}</span>
+          <span class="status-pill" style="background:${st.bg};color:${st.c}">${st.l}</span>
+          <i class="chevron ti ti-chevron-down" id="ch-${i}"></i>
+        </div>
+      </div>
+      <div class="cat-body" id="cb-${i}" style="display:none">
+        <div class="bar-bg"><div class="bar-fill" style="width:${cat.score}%;background:${bc}"></div></div>
+        <div class="cat-sum">${cat.summary}</div>
+        ${flagsHtml?`<div class="flags">${flagsHtml}</div>`:''}
+      </div>
+    </div>`;
+  });
+  document.getElementById(catsId).innerHTML = cHtml;
+
+  // Risks + positives
+  const risks = (r.top_risks||[]).map(x=>`<li>${x}</li>`).join('');
+  const pos = (r.top_positives||[]).map(x=>`<li>${x}</li>`).join('');
+  document.getElementById(rpId).innerHTML = `
+    <div class="mini-card">
+      <div class="mini-title" style="color:#F1948A"><i class="ti ti-alert-triangle" style="color:#C0392B"></i>Top Risks</div>
+      <ul class="mini-list">${risks}</ul>
+    </div>
+    <div class="mini-card">
+      <div class="mini-title" style="color:#7DCEA0"><i class="ti ti-circle-check" style="color:#27AE60"></i>Positives</div>
+      <ul class="mini-list">${pos}</ul>
+    </div>`;
+
+  // Embed code (show for certifiable scores)
+  if (r.total_score >= 40) {
+    const slug = (r.company_name||'company').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+    document.getElementById(embedId).style.display = 'block';
+    document.getElementById(embedCodeId).textContent = `<script src="https://tosfirewall.com/badge/${slug}.js" async><\/script>`;
+  }
+}
+
+/* ── RENDER SCAN RESULT ── */
+function renderScanResult(r) {
+  const b = BADGE_CFG[r.badge_level]||BADGE_CFG.NOT_CERTIFIED;
+  const rec = REC_CFG[r.recommendation]||REC_CFG.DO_NOT_CERTIFY;
+  let cHtml = '';
+  (r.categories||[]).forEach((cat,i) => {
+    const st = STATUS_CFG[cat.status]||STATUS_CFG.WARN;
+    const bc = BAR_CFG[cat.status]||BAR_CFG.WARN;
+    let flagsHtml = (cat.flags||[]).map(f => {
+      const fc = FLAG_CFG[f.severity]||FLAG_CFG.YELLOW;
+      return `<div class="flag" style="background:${fc.bg};border-left-color:${fc.border}">
+        <div class="flag-clause">"${f.clause}"</div>
+        <div class="flag-plain">${f.plain_english}</div>
+      </div>`;
+    }).join('');
+    cHtml += `<div class="cat-item">
+      <div class="cat-header" onclick="toggleCat2(${i})">
+        <div><div class="cat-name">${cat.name}</div><div class="cat-weight">Weight: ${cat.weight}%</div></div>
+        <div class="cat-right">
+          <span class="cat-num" style="color:${bc}">${cat.score}</span>
+          <span class="status-pill" style="background:${st.bg};color:${st.c}">${st.l}</span>
+          <i class="chevron ti ti-chevron-down" id="sch-${i}"></i>
+        </div>
+      </div>
+      <div class="cat-body" id="scb-${i}" style="display:none">
+        <div class="bar-bg"><div class="bar-fill" style="width:${cat.score}%;background:${bc}"></div></div>
+        <div class="cat-sum">${cat.summary}</div>
+        ${flagsHtml?`<div class="flags">${flagsHtml}</div>`:''}
+      </div>
+    </div>`;
+  });
+  const risks=(r.top_risks||[]).map(x=>`<li>${x}</li>`).join('');
+  const pos=(r.top_positives||[]).map(x=>`<li>${x}</li>`).join('');
+  const slug=(r.company_name||'company').toLowerCase().replace(/[^a-z0-9]+/g,'-');
+  const embedHtml = r.total_score>=40 ? `
+    <div class="embed-card">
+      <div class="sec-label" style="margin-bottom:8px"><i class="ti ti-code" style="color:var(--gold)"></i>Embed your badge</div>
+      <div class="embed-code">&lt;script src="https://tosfirewall.com/badge/${slug}.js" async&gt;&lt;/script&gt;</div>
+    </div>` : '';
+
+  document.getElementById('scan-result').innerHTML = `
+    <div class="badge-hero" style="background:var(--ink2);border-radius:14px;border:1px solid var(--steel)">
+      <div class="badge-circle" style="background:${b.bg};border-color:${b.border}">
+        <div class="badge-score" style="color:${b.color}">${r.total_score}</div>
+        <div class="badge-denom" style="color:${b.color}">/100</div>
+      </div>
+      <div class="badge-info">
+        <div class="badge-level-pill" style="background:${b.pill_bg};color:${b.pill_c}">${b.label}</div>
+        <h3>${r.company_name||'Unknown Company'}</h3>
+        <div class="badge-summary">${r.summary}</div>
+      </div>
+    </div>
+    <div class="rec-bar" style="background:${rec.bg};border:${rec.border};color:${rec.c}">
+      <i class="ti ${rec.icon}" style="font-size:16px"></i>${rec.t}
+    </div>
+    <div class="sec-label"><i class="ti ti-chart-bar" style="color:var(--gold)"></i>Score Breakdown</div>
+    <div class="cats">${cHtml}</div>
+    <div class="two-col" style="margin-bottom:1.25rem">
+      <div class="mini-card"><div class="mini-title" style="color:#F1948A"><i class="ti ti-alert-triangle" style="color:#C0392B"></i>Top Risks</div><ul class="mini-list">${risks}</ul></div>
+      <div class="mini-card"><div class="mini-title" style="color:#7DCEA0"><i class="ti ti-circle-check" style="color:#27AE60"></i>Positives</div><ul class="mini-list">${pos}</ul></div>
+    </div>
+    ${embedHtml}
+    <button class="reset-btn" onclick="resetScan()"><i class="ti ti-arrow-left"></i> Scan another document</button>`;
+  document.getElementById('scan-result').style.display = 'block';
+}
+
+function toggleCat2(i) {
+  const body = document.getElementById('scb-'+i);
+  const chev = document.getElementById('sch-'+i);
+  const open = body.style.display !== 'none';
+  body.style.display = open ? 'none' : 'block';
+  chev.className = 'chevron ti ti-chevron-down' + (open ? '' : ' open');
+}
+
+/* ── IMPROVE ── */
+function buildImproveSuggestions(report) {
+  const suggestions = report.improve_suggestions || [];
+  const failingCats = (report.categories||[]).filter(c=>c.status==='FAIL'||c.status==='WARN').map(c=>c.name);
+  let html = '';
+  if (failingCats.length) html += `<div style="margin-bottom:8px;color:var(--fog)">Categories needing improvement: <strong style="color:#E8C97A">${failingCats.join(', ')}</strong></div>`;
+  if (suggestions.length) {
+    html += suggestions.map(s=>`<div style="display:flex;gap:8px;margin-bottom:4px;font-size:12px"><i class="ti ti-arrow-right" style="color:var(--gold);flex-shrink:0;margin-top:2px"></i><span>${s}</span></div>`).join('');
+  }
+  document.getElementById('improve-suggestions').innerHTML = html || 'Click to regenerate with improved user-friendly clauses.';
+}
+
+function showImprovePanel() {
+  document.getElementById('improve-panel').style.display = 'block';
+  document.getElementById('improve-panel').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function improveDoc() {
+  if (!state.generatedDoc) return;
+  const btn = document.querySelector('.improve-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="ti ti-loader" style="animation:spin 0.8s linear infinite"></i> Regenerating...';
+
+  const report = state.currentScore;
+  const improvements = report?.improve_suggestions?.join(', ') || 'Make all clauses more user-friendly, add explicit no-sell pledge, improve transparency';
+
+  try {
+    const resp = await fetch('/api/score', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:3000,
+        temperature:0.3,
+        system: GEN_SYSTEM,
+        messages:[{role:'user',content:`Improve this document to score HIGHER on TOS Firewall trust scoring. Apply these specific improvements: ${improvements}\n\nOriginal document:\n\n${state.generatedDoc}`}]
+      })
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error?.message);
+    state.generatedDoc = data.document || data.content?.[0]?.text || state.generatedDoc;
+    document.getElementById('doc-output').textContent = state.generatedDoc;
+    document.getElementById('improve-panel').style.display = 'none';
+    showToast('Document improved! Re-scoring...');
+    document.getElementById('gen-loading').style.display = 'block';
+    document.getElementById('gen-loading-msg').textContent = 'Re-scoring improved document...';
+    await scoreDocument(state.generatedDoc, 'gen');
+  } catch(e) {
+    showToast('Error: '+e.message);
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="ti ti-refresh"></i> Regenerate with Improvements Applied';
+  }
+}
+
+/* ── RUN SCAN ── */
+async function runScan() {
+  const text = document.getElementById('scan-input').value.trim();
+  if (!text || text.length < 100) { showToast('Please paste a ToS document (at least 100 characters)'); return; }
+  document.getElementById('scan-btn').disabled = true;
+  document.getElementById('scan-form-section').style.display = 'none';
+  document.getElementById('scan-loading').style.display = 'block';
+  document.getElementById('scan-result').style.display = 'none';
+  const interval = startLoadingMsg(document.getElementById('scan-loading-msg'), SCAN_MSGS);
+  try {
+    clearInterval(interval);
+    await scoreDocument(text, 'scan');
+  } catch(e) {
+    clearInterval(interval);
+    document.getElementById('scan-loading').style.display = 'none';
+    document.getElementById('scan-form-section').style.display = 'block';
+    document.getElementById('scan-btn').disabled = false;
+    showToast('Error: '+e.message);
+  }
+  document.getElementById('scan-btn').disabled = false;
+}
+
+/* ── COPY / DOWNLOAD ── */
+function copyDoc() {
+  navigator.clipboard.writeText(state.generatedDoc).then(()=>showToast('Copied to clipboard!'));
+}
+
+function downloadDoc() {
+  const name = document.getElementById('q-name').value||'document';
+  const blob = new Blob([state.generatedDoc],{type:'text/plain'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name.replace(/\s+/g,'-').toLowerCase()+'-tos-firewall.txt';
+  a.click();
+  showToast('Downloaded!');
+}
+
+/* ── RESETS ── */
+function resetGenerator() {
+  document.getElementById('gen-form-section').style.display = 'block';
+  document.getElementById('gen-result').style.display = 'none';
+  document.getElementById('score-section').style.display = 'none';
+  document.getElementById('improve-panel').style.display = 'none';
+  state.generatedDoc = '';
+  state.currentScore = null;
+}
+
+function resetScan() {
+  document.getElementById('scan-form-section').style.display = 'block';
+  document.getElementById('scan-result').style.display = 'none';
+  document.getElementById('scan-input').value = '';
+}
+</script>
+</body>
+</html>
