@@ -104,16 +104,22 @@ export default async function handler(req, res) {
       throw new Error(data.error?.message || 'Claude API error ' + response.status);
     }
 
-    const rawText = data.content[0].text
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
-      .trim();
+    let rawText = data.content[0].text
+  .replace(/```json/g, '')
+  .replace(/```/g, '')
+  .trim();
 
-    const report = JSON.parse(rawText);
+// Extract JSON object if there's any surrounding text
+const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+if (!jsonMatch) {
+  throw new Error('No JSON found in response');
+}
 
-    if (!report.total_score || !report.badge_level || !report.categories) {
-      throw new Error('Invalid report structure');
-    }
+const report = JSON.parse(jsonMatch[0]);
+
+if (!report.total_score || !report.badge_level || !report.categories) {
+  throw new Error('Invalid report structure');
+}
 
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(report);
