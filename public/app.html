@@ -591,16 +591,10 @@ Generate a comprehensive, user-friendly ${selectedLabels} that scores GOLD or PL
 async function scoreDocument(text, mode) {
   try {
     const resp = await fetch('/api/score', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:2000,
-        temperature:0.1,
-        system: SCORE_SYSTEM,
-        messages:[{role:'user',content:'Analyze this document and return ONLY the JSON:\n\n'+text.substring(0,40000)}]
-      })
-    });
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({ text: text })
+});
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error?.message||'Score API error');
     const raw = typeof data === 'object' && data.total_score ? JSON.stringify(data) : (data.content?.[0]?.text || '{}').replace(/```json/g,'').replace(/```/g,'').trim();
@@ -803,17 +797,11 @@ async function improveDoc() {
   const improvements = report?.improve_suggestions?.join(', ') || 'Make all clauses more user-friendly, add explicit no-sell pledge, improve transparency';
 
   try {
-    const resp = await fetch('/api/score', {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:3000,
-        temperature:0.3,
-        system: GEN_SYSTEM,
-        messages:[{role:'user',content:`Improve this document to score HIGHER on TOS Firewall trust scoring. Apply these specific improvements: ${improvements}\n\nOriginal document:\n\n${state.generatedDoc}`}]
-      })
-    });
+    const resp = await fetch('/api/generate', {
+  method:'POST',
+  headers:{'Content-Type':'application/json'},
+  body: JSON.stringify({ prompt: `Improve this document to score HIGHER on TOS Firewall trust scoring. Apply these specific improvements: ${improvements}\n\nOriginal document:\n\n${state.generatedDoc}` })
+});
     const data = await resp.json();
     if (!resp.ok) throw new Error(data.error?.message);
     state.generatedDoc = data.document || data.content?.[0]?.text || state.generatedDoc;
