@@ -109,18 +109,21 @@ export default async function handler(req, res) {
   .replace(/```/g, '')
   .trim();
 
-// Extract JSON object if there's any surrounding text
 const jsonMatch = rawText.match(/\{[\s\S]*\}/);
 if (!jsonMatch) {
   throw new Error('No JSON found in response');
 }
 
-const report = JSON.parse(jsonMatch[0]);
+let cleanJson = jsonMatch[0]
+  .replace(/,\s*\]/g, ']')
+  .replace(/,\s*\}/g, '}')
+  .replace(/[\x00-\x1F\x7F]/g, ' ');
+
+const report = JSON.parse(cleanJson);
 
 if (!report.total_score || !report.badge_level || !report.categories) {
   throw new Error('Invalid report structure');
 }
-
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.status(200).json(report);
 
